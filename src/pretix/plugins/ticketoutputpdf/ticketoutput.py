@@ -59,9 +59,17 @@ class PdfTicketOutput(BaseTicketOutput):
             if 'bolditalic' in styles:
                 pdfmetrics.registerFont(TTFont(family + ' B I', finders.find(styles['bolditalic']['truetype'])))
 
-    def _draw_barcodearea(self, canvas: Canvas, op: OrderPosition, o: dict):
+    def _draw_barcodearea(self, canvas: Canvas, op: OrderPosition, o: dict, index=0):
         reqs = float(o['size']) * mm
-        qrw = QrCodeWidget(op.secret, barLevel='H', barHeight=reqs, barWidth=reqs)
+        if index == 0:
+            qrw = QrCodeWidget(op.secret, barLevel='H', barHeight=reqs, barWidth=reqs)
+        elif index == 1:
+            qrw = QrCodeWidget(op.order.code, barLevel='H', barHeight=reqs, barWidth=reqs)
+        else:
+            return
+        print("=======================")
+        print(op.order.code)
+        print("=======================")
         d = Drawing(reqs, reqs)
         d.add(qrw)
         qr_x = float(o['left']) * mm
@@ -120,9 +128,14 @@ class PdfTicketOutput(BaseTicketOutput):
 
     def _draw_page(self, canvas: Canvas, op: OrderPosition, order: Order):
         objs = self.override_layout or self.settings.get('layout', as_type=list) or self._legacy_layout()
+        qr_index = 0
         for o in objs:
             if o['type'] == "barcodearea":
-                self._draw_barcodearea(canvas, op, o)
+                print("========== barcode area =================")
+                print(o)
+                print("---------------------------------")
+                self._draw_barcodearea(canvas, op, o, qr_index)
+                qr_index += 1
             elif o['type'] == "textarea":
                 self._draw_textarea(canvas, op, order, o)
 

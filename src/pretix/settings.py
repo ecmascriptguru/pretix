@@ -22,9 +22,10 @@ else:
 
 CONFIG_FILE = config
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-DATA_DIR = config.get('pretix', 'datadir', fallback=os.environ.get('DATA_DIR', 'data'))
+DATA_DIR = config.get('pretix', os.path.join(BASE_DIR, 'data'), fallback=os.environ.get('DATA_DIR', 'data'))
 LOG_DIR = os.path.join(DATA_DIR, 'logs')
-MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
+# MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'data/media')
 PROFILE_DIR = os.path.join(DATA_DIR, 'profiles')
 
 if not os.path.exists(DATA_DIR):
@@ -135,8 +136,17 @@ EMAIL_PORT = config.getint('mail', 'port', fallback=25)
 EMAIL_HOST_USER = config.get('mail', 'user', fallback='')
 EMAIL_HOST_PASSWORD = config.get('mail', 'password', fallback='')
 EMAIL_USE_TLS = config.getboolean('mail', 'tls', fallback=False)
-EMAIL_USE_SSL = config.getboolean('mail', 'ssl', fallback=False)
+# EMAIL_USE_SSL = config.getboolean('mail', 'ssl', fallback=False)
 EMAIL_SUBJECT_PREFIX = '[pretix] '
+
+
+MAIL_FROM = 'ecmascript.guru@gmail.com'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'ecmascript.guru@gmail.com'
+EMAIL_HOST_PASSWORD = 'dlftlaeksruf6'
+EMAIL_USE_TLS = True
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 ADMINS = [('Admin', n) for n in config.get('mail', 'admins', fallback='').split(",") if n]
 
@@ -196,6 +206,9 @@ if HAS_CELERY:
     CELERY_RESULT_BACKEND = config.get('celery', 'backend')
 else:
     CELERY_TASK_ALWAYS_EAGER = True
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 SESSION_COOKIE_DOMAIN = config.get('pretix', 'cookie_domain', fallback=None)
 
